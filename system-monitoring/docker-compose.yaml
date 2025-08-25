@@ -1,0 +1,36 @@
+services:
+  node-exporter:
+    image: prom/node-exporter
+    volumes:
+      - /:/host:ro
+    command:
+      - '--path.rootfs=/host'
+      - '--path.sysfs=/host/sys'
+      - '--collector.wifi'
+    network_mode: "host"
+    restart: always
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=1y'
+    ports:
+      - "9090:9090"
+    restart: always
+
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    restart: always
+
+volumes:
+  prometheus-data:
+  grafana-data:
