@@ -41,3 +41,8 @@ scrape_configs:
         - '10.5.61.228:9100'
         - '10.5.61.229:9100'
         - '10.5.61.230:9100'
+
+  - job_name: 'sensors'
+    static_configs:
+      - targets:
+        - '172.17.0.1:9100'

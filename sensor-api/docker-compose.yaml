@@ -8,17 +8,6 @@ services:
       - ./main.py:/usr/src/app/main.py
     command: python -u main.py
 
-  touch-sensor:
-    build:
-      context: .
-    privileged: true
-    devices:
-      - "/dev/gpiomem:/dev/gpiomem"
-    volumes:
-      - "/sys:/sys"   # mount full sysfs, not just /sys/class/gpio
-      - "./touch_sensor.py:/usr/src/app/touch_sensor.py"
-    command: python -u touch_sensor.py
-
   web-server:
     build:
       context: .
@@ -26,6 +15,8 @@ services:
     volumes:
       - ./air_sensor.py:/usr/src/app/air_sensor.py
       - ./webserver.py:/usr/src/app/webserver.py
+      - ./touch_sensor.py:/usr/src/app/touch_sensor.py
+      - ./light_sensor.py:/usr/src/app/light_sensor.py
     ports:
       - 8080:8080
     command: python -u webserver.py
