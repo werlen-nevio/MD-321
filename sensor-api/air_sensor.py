@@ -1,32 +1,30 @@
+import threading
 from time import sleep
 import RPi.GPIO as GPIO
-import threading
 import dht11
 
-# initialize GPIO
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BOARD)
-GPIO.cleanup()
-    
-# read data using pin 14
-
-class AirSensor():
-    def update(self):
-        while True:
-            readout = self.instance.read()
-            valid = readout.is_valid()
-            if valid:  # read until valid values
-                print(f'Temperature: {readout.temperature}°C Humidity: {readout.humidity}%')
-                self.result = readout
-            else:
-                sleep(2)
-
-    def __init__(self):
-        self.instance = dht11.DHT11(pin = 7)
+class AirSensor:
+    def __init__(self, pin=4, poll_sec=2):
+        self.instance = dht11.DHT11(pin=pin)
+        self.poll_sec = poll_sec
         self.result = self.instance.read()
-        print(self.result.__dict__)
+        self._stop = False
+        self._t = threading.Thread(target=self._update_loop, daemon=True)
+        self._t.start()
 
-        threading.Thread(target=self.update, daemon=True).start()
-    
+    def _update_loop(self):
+        while not self._stop:
+            readout = self.instance.read()
+            if readout.is_valid():
+                self.result = readout
+            sleep(self.poll_sec)
+
     def readAir(self):
         return self.result
+
+    def cleanup(self):
+        self._stop = True
+        try:
+            self._t.join(timeout=1)
+        except Exception:
+            pass

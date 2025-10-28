@@ -1,32 +1,37 @@
-from RPi import GPIO
-import signal
+import RPi.GPIO as GPIO
 
 class TouchSensor:
-    def __init__(self, pin=11):
+    def __init__(self, pin=17, pull_up=True, bouncetime_ms=200):
         self.pin = pin
-        self._setup_gpio()
+        self.bouncetime_ms = bouncetime_ms
 
-    def _setup_gpio(self):
-        """Initialisiert GPIO für den Touch-Sensor."""
-        GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(self.pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        pud = GPIO.PUD_UP if pull_up else GPIO.PUD_DOWN
+        GPIO.setup(self.pin, GPIO.IN, pull_up_down=pud)
+
+        self._cb_registered = False
 
     def _on_touch(self, channel):
-        """Callback-Funktion bei Touch-Ereignis."""
         print("Touch wurde erkannt")
 
     def run(self):
-        """Startet die Ereigniserkennung und wartet."""
         try:
             GPIO.add_event_detect(
-                self.pin, GPIO.FALLING, callback=self._on_touch, bouncetime=200
+                self.pin, GPIO.FALLING, callback=self._on_touch, bouncetime=self.bouncetime_ms
             )
-            signal.pause()
+            self._cb_registered = True
         except KeyboardInterrupt:
             pass
-        finally:
-            GPIO.cleanup()
 
-if __name__ == "__main__":
-    sensor = TouchSensor(pin=11)
-    sensor.run()
+    def readTouch(self) -> int:
+        return 1 if GPIO.input(self.pin) == GPIO.LOW else 0
+
+    def cleanup(self):
+        try:
+            if self._cb_registered:
+                GPIO.remove_event_detect(self.pin)
+        except Exception:
+            pass
+        try:
+            GPIO.cleanup(self.pin)
+        except Exception:
+            pass
