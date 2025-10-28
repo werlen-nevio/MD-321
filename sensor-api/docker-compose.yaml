@@ -17,6 +17,16 @@ services:
       - ./webserver.py:/usr/src/app/webserver.py
       - ./touch_sensor.py:/usr/src/app/touch_sensor.py
       - ./light_sensor.py:/usr/src/app/light_sensor.py
+      - ./pir_sensor.py:/usr/src/app/pir_sensor.py
+      - ./ultrasonic_sensor.py:/usr/src/app/ultrasonic_sensor.py
     ports:
       - 8080:8080
     command: python -u webserver.py
+
+  dashboard:
+    image: nginx:latest
+    container_name: sensor-dashboard
+    ports:
+      - 80:80
+    volumes:
+      - ./dashboard:/usr/share/nginx/html:ro

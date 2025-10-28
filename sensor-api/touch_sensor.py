@@ -23,7 +23,7 @@ class TouchSensor:
             pass
 
     def readTouch(self) -> int:
-        return 1 if GPIO.input(self.pin) == GPIO.LOW else 0
+        return 0 if GPIO.input(self.pin) == GPIO.LOW else 1
 
     def cleanup(self):
         try:

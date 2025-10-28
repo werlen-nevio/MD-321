@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sensor Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            margin-bottom: 1rem;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 1.5rem 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+            text-align: center;
+        }
+
+        .value {
+            font-size: 1.5rem;
+            margin: .5rem 0;
+        }
+
+        .ok {
+            color: #4ade80;
+        }
+
+        .warn {
+            color: #facc15;
+        }
+
+        .err {
+            color: #f87171;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🌡️ Sensor Dashboard</h1>
+    <div class="card">
+        <div class="value" id="temperature">Temp: -- °C</div>
+        <div class="value" id="humidity">Feuchtigkeit: -- %</div>
+        <div class="value" id="light">Licht: -- %</div>
+        <div class="value" id="touch">Touch: --</div>
+        <div class="value" id="motion">Bewegung: --</div>
+        <div class="value" id="distance">Distanz: -- cm</div>
+    </div>
+
+    <script>
+        async function fetchData() {
+            try {
+                const res = await fetch('http://192.168.1.120:8080/');
+                const data = await res.json();
+
+                document.getElementById('temperature').textContent = `Temp: ${data.temperature ?? '-'} °C`;
+                document.getElementById('humidity').textContent = `Feuchtigkeit: ${data.humidity ?? '-'} %`;
+                document.getElementById('light').textContent = `Licht: ${data.light ?? '-'} Lux`;
+                document.getElementById('touch').textContent = `Touch: ${data.touch ? '🟢 aktiv' : '⚪️ inaktiv'}`;
+                document.getElementById('motion').textContent = `Bewegung: ${data.motion ? '🟠 erkannt' : '⚫️ keine'}`;
+                document.getElementById('distance').textContent = `Distanz: ${data.distance_cm ?? '-'} cm`;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        fetchData();
+        setInterval(fetchData, 2000);
+    </script>
+</body>
+
+</html>
